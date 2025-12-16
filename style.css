@@ -1,95 +1,99 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Arial', sans-serif;
-    color: #eee; /* 根据波洛克背景调整字体颜色 */
-    /* 使用你提供的波洛克风格背景图 */
+    font-family: sans-serif;
+    color: #fff; /* 假设背景是黑白，文字可能需要白色 */
+    overflow: hidden; /* 防止浏览器默认滚动条 */
+    height: 100vh; /* 确保 body 占满视口高度 */
+    
+    /* 波洛克背景图，请替换为你的图片路径 */
     background-image: url('assets/background.jpg');
     background-attachment: fixed;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center center;
-    overflow: hidden; /* 隐藏滚动条，因为内容通过JS移动 */
-    height: 100vh; /* 确保 body 占满整个视口 */
-    cursor: grab; /* 提示用户可以交互 */
+    cursor: grab; /* 初始鼠标样式，提示可拖拽 */
 }
 
-/* 导航和标题 */
+/* 鼠标拖拽时的样式 */
+body.is-dragging {
+    cursor: grabbing;
+}
+
 .site-header {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    padding: 25px 50px; /* 增加内边距 */
-    z-index: 10; /* 确保在最上层 */
+    padding: 20px 40px;
+    z-index: 100; /* 确保导航在所有内容之上 */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #fff; /* 白色文本 */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* 增强可读性 */
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .site-header h1 {
     margin: 0;
-    font-size: 2.8em; /* 增大标题 */
-    font-weight: bold;
-    letter-spacing: 2px;
+    font-size: 2em;
 }
 
 .site-header nav a {
     color: #fff;
     text-decoration: none;
-    font-size: 1.2em;
     margin-left: 30px;
+    font-size: 1.1em;
     transition: color 0.3s ease;
 }
 
 .site-header nav a:hover {
-    color: #00ffcc; /* 悬停高亮色 */
+    color: #ccc;
 }
 
-/* 拼贴容器 */
-.collage-container {
+/* 关键：包裹作品容器，并裁剪超出部分 */
+#scroll-wrapper {
     position: absolute;
-    /* 设置一个比视口大得多的尺寸，以确保有足够的作品可以“滑动” */
-    /* 这里的比例可以根据你的作品数量和大小调整 */
-    width: 300vw; /* 视口宽度的 3 倍 */
-    height: 300vh; /* 视口高度的 3 倍 */
-    
-    /* 初始位置偏移，让页面加载时作品处于一个相对居中的状态 */
-    top: -100vh; /* (300vh - 100vh) / 2 = 100vh，从顶部偏移 100vh */
-    left: -100vw; /* (300vw - 100vw) / 2 = 100vw，从左侧偏移 100vw */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* 隐藏超出这个容器的部分 */
+    /* pointer-events: none; /* 如果作品不需要点击交互，可以这样设置，让鼠标事件穿透到body */
+}
+
+/* 拼贴容器，实际被拖拽移动的元素 */
+#collage-container {
+    position: absolute;
+    /* 容器初始位置和大小。需要足够大来容纳所有作品并提供拖拽空间 */
+    /* 假设容器比视口大很多，这样可以拖拽看到不同的区域 */
+    width: 250vw; 
+    height: 250vh;
+    /* 初始居中或设置一个起始位置，方便开始拖拽 */
+    top: -75vh; 
+    left: -75vw;
     
     will-change: transform; /* 提升动画性能 */
-    /* 增加一个平滑的过渡，让鼠标移动更自然 */
-    transition: transform 0.05s linear; /* 可以根据喜好调整速度和缓动函数 */
+    /* transition: transform 0.1s ease-out; /* 可以移除，JS会控制更精细的缓动 */
 }
 
-/* 拼贴作品图片样式 */
+/* 拼贴作品的定位和尺寸 */
 .collage-item {
-    position: absolute;
-    height: auto;
-    /* 增加一些阴影，让作品更突出 */
-    filter: drop-shadow(5px 5px 10px rgba(0, 0, 0, 0.5));
-    transition: transform 0.2s ease-out; /* 鼠标悬停时作品可以有自己的动效 */
+    position: absolute; /* 绝对定位 */
+    max-width: 40%; /* 限制作品最大宽度，以适应不同屏幕 */
+    height: auto; /* 保持图片比例 */
+    pointer-events: auto; /* 允许作品上的点击事件，如果需要的话 */
+    transition: transform 0.3s ease; /* 作品也可以有Hover效果 */
 }
 
 .collage-item:hover {
-    transform: scale(1.05) rotate(0deg) !important; /* 悬停放大，并取消可能存在的旋转 */
-    z-index: 5; /* 悬停时置顶 */
+    transform: scale(1.05); /* 鼠标悬停时略微放大 */
 }
 
-
-/* 为每个作品设置随机的位置、大小和旋转角度 */
-/* 你需要根据你的实际作品数量来增加或修改这些样式 */
-.item-1 { top: 15%; left: 10%; width: 25%; transform: rotate(-10deg); }
-.item-2 { bottom: 20%; right: 15%; width: 30%; transform: rotate(5deg); }
-.item-3 { top: 50%; left: 40%; width: 20%; transform: rotate(20deg); }
-.item-4 { top: 5%; right: 30%; width: 28%; transform: rotate(-5deg); }
-.item-5 { bottom: 10%; left: 5%; width: 35%; transform: rotate(10deg); }
-.item-6 { top: 30%; left: 60%; width: 22%; transform: rotate(-15deg); }
-.item-7 { bottom: 40%; left: 30%; width: 27%; transform: rotate(8deg); }
-.item-8 { top: 70%; right: 5%; width: 32%; transform: rotate(-12deg); }
-.item-9 { top: 25%; left: 35%; width: 26%; transform: rotate(3deg); }
-
-/* 可以继续添加更多 .item-N 样式 */
+/* 为你的每个作品设置独特的初始位置、大小和旋转角度 */
+.item-1 { top: 10%; left: 15%; width: 400px; transform: rotate(-8deg); }
+.item-2 { bottom: 5%; right: 10%; width: 350px; transform: rotate(12deg); }
+.item-3 { top: 60%; left: 50%; width: 500px; transform: rotate(25deg); }
+.item-4 { top: 30%; left: 70%; width: 280px; transform: rotate(-20deg); }
+.item-5 { bottom: 20%; left: 5%; width: 450px; transform: rotate(5deg); }
+/* 继续添加更多作品的样式 */
